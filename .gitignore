@@ -1,0 +1,6 @@
+.vscode/
+reminder/reminder__pycache__
+reminder/user/__pycache__
+reminder/payments/__pycache__
+__pycache__
+reminder/db.sqlite3
