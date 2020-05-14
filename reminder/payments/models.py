@@ -1,7 +1,20 @@
 from django.db import models
 from django.utils import timezone
 from user.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
 # Create your models here.
+
+
+class IntegerRangeField(models.IntegerField):
+    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
+        self.min_value, self.max_value = min_value, max_value
+        models.IntegerField.__init__(self, verbose_name, name, **kwargs)
+    def formfield(self, **kwargs):
+        defaults = {'min_value': self.min_value, 'max_value':self.max_value}
+        defaults.update(kwargs)
+        return super(IntegerRangeField, self).formfield(**defaults)
+
+
 
 
 class PaymentGroup(models.Model):
@@ -15,7 +28,7 @@ class PaymentGroup(models.Model):
 class Payment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
     created_at = models.DateTimeField()
-    payment_date = models.DateField(blank=True, null=True)
+    payment_day = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(1), MaxValueValidator(31)])
     name = models.CharField(max_length=100, blank=False, null=False)
     group = models.ForeignKey(PaymentGroup, on_delete=models.CASCADE, related_name='payments', blank=True, null=True)
 
@@ -36,6 +49,12 @@ class Payment(models.Model):
 
     def __str__(self):
         return self.name
+
+class PaymentByDay(models.Model):
+    pass
+
+
+
 
 class PaymentTracking(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='history')
